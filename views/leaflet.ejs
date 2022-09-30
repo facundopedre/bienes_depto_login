@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
-<script src="../src/leaflet-search.css" type="text/css" rel="stylesheet"></script>
-<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
-<!-- <script src="mapdata.geojson" type="text/javascript"></script> -->
-<script src="https://unpkg.com/leaflet@1.3.0/dist/leaflet.js"></script>
 
+<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.3.0/dist/leaflet.js"></script>
+<script src="../src/leaflet-search.css" type="text/css" rel="stylesheet"></script>
 <script src="../src/leaflet-search.js" type="text/javascript"></script>
+<script src="../src/leaflet-wfst.min.js" type="text/javascript"></script>
 
 <style type="text/css">
     #map {
@@ -25,9 +25,9 @@
         </form>
     </div>
 
+    <h1>Búsqueda de padrones especiales</h1>
     <div id="map">
         <script type="text/javascript">
-
             var map = L.map('map').setView([-34.83, -56.21], 11);
 
             var capa_base = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
@@ -42,23 +42,73 @@
                 version: '1.1.0',
                 attribution: false
             });
+
             capa_padrones.addTo(map);
 
-            var capa_padrones_wfs = L.tileLayer('http://geoserver.montevideo.gub.uy/geoserver/ide/wfs', {
-                layers: 'ide:v_sb_bienes_depto',
-                format: 'image/png',
-                transparent: true,
-                version: '1.1.0',
-                attribution: false
-            });
+            const wfstPointOptions = {
+                crs: L.CRS.EPSG4326,
+                showExisting: true,
+                geometryField: 'the_geom',
+                url: `http://geoserver.montevideo.gub.uy/geoserver/ide/wfs?service=WFS&version=1.1.0&request=getCapabilities`,
+                typeNS: 'v_sb_bienes_depto',
+                typeName: 'v_sb_bienes_depto',
+                style: function (layer) {
+                    // you can use if statemt etc
+                    return {
+                        color: 'black',
+                        weight: 1
+                    }
+                },
+            };
 
-            map.addControl(new L.Control.Search({
+            var capa_padrones_wfs = new L.WFS(wfstPointOptions).addTo(map);
+
+            var capas_busqueda = L.layerGroup([capa_padrones_wfs]);
+            var searchControl = map.addControl(new L.Control.Search({
                 layer: capa_padrones_wfs,
                 propertyName: 'padron',
                 textPlaceholder: 'Busqueda de padrones',
-                collapsed:false,
-                moveToLocation: function (latlng, title, map) { console.log(latlng); map.setView(latlng, 16); }
+                collapsed: false,
+                moveToLocation: function (latlng, title, map) {
+                    console.log(latlng);
+                    map.setView(latlng, 16);
+                    var featuresLayer = new L.GeoJSON(latlng.layer.feature, {
+                        onEachFeature: function (feature, marker) {
+                            marker.bindPopup('<h4>' + feature.properties.area + '</h4>');
+                            console.log(feature);
+                            console.log(marker);
+                        }
+                    });
+                    console.log(featuresLayer);
+                    map.addLayer(featuresLayer);
+                }
             }));
+
+            map.on('click', function (ev) {
+                console.log(ev.latlng);
+                console.log(ev.layerPoint);
+            });
+
+
+            /* 
+                        searchControl.on('search:locationfound', function (e) {
+            
+                                //console.log('search:locationfound', );
+            
+                                //map.removeLayer(this._markerSearch)
+            
+                                e.layer.setStyle({ fillColor: '#3f0', color: '#0f0' });
+                                if (e.layer._popup)
+                                    e.layer.openPopup();
+            
+                            }).on('search:collapsed', function (e) {
+            
+                                featuresLayer.eachLayer(function (layer) {	//restore feature color
+                                    featuresLayer.resetStyle(layer);
+                                });
+                            });
+
+            map.addControl(searchControl);  //inizialize search control */
 
         </script>
     </div>

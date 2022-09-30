@@ -55,6 +55,10 @@ app.get('/src/leaflet-search.css', function(req, res) {
   res.sendFile(path.join(__dirname + '/node_modules/leaflet-search/src/leaflet-search.css'));
 });
 
+app.get('/src/leaflet-wfst.min.js', function(req, res) {
+  res.sendFile(path.join(__dirname + '/node_modules/leaflet-wfst/dist/leaflet-wfst.min.js'));
+});
+
 app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
   successRedirect: '/',
   failureRedirect: '/login',
