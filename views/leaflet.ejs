@@ -25,9 +25,9 @@
         </form>
     </div>
 
+    <h1>Búsqueda de padrones especiales</h1>
     <div id="map">
         <script type="text/javascript">
-
             var map = L.map('map').setView([-34.83, -56.21], 11);
 
             var capa_base = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
@@ -42,16 +42,16 @@
                 version: '1.1.0',
                 attribution: false
             });
-            console.log(capa_padrones)
+
             capa_padrones.addTo(map);
 
             const wfstPointOptions = {
                 crs: L.CRS.EPSG4326,
                 showExisting: true,
                 geometryField: 'the_geom',
-                url: `http://geoserver.montevideo.gub.uy/geoserver/ows?`,
-                typeNS: 'ide:ide_v_mdg_manzanas',
-                typeName: 'ide:ide_v_mdg_manzanas',
+                url: `http://geoserver.montevideo.gub.uy/geoserver/ide/wfs?service=WFS&version=1.1.0&request=getCapabilities`,
+                typeNS: 'v_sb_bienes_depto',
+                typeName: 'v_sb_bienes_depto',
                 style: function (layer) {
                     // you can use if statemt etc
                     return {
@@ -62,16 +62,53 @@
             };
 
             var capa_padrones_wfs = new L.WFS(wfstPointOptions).addTo(map);
-            console.log(capa_padrones_wfs);
 
             var capas_busqueda = L.layerGroup([capa_padrones_wfs]);
-            map.addControl(new L.Control.Search({
+            var searchControl = map.addControl(new L.Control.Search({
                 layer: capa_padrones_wfs,
-                propertyName: 'carpeta_catastral',
+                propertyName: 'padron',
                 textPlaceholder: 'Busqueda de padrones',
                 collapsed: false,
-                moveToLocation: function (latlng, title, map) { console.log(latlng); map.setView(latlng, 16); }
+                moveToLocation: function (latlng, title, map) {
+                    console.log(latlng);
+                    map.setView(latlng, 16);
+                    var featuresLayer = new L.GeoJSON(latlng.layer.feature, {
+                        onEachFeature: function (feature, marker) {
+                            marker.bindPopup('<h4>' + feature.properties.area + '</h4>');
+                            console.log(feature);
+                            console.log(marker);
+                        }
+                    });
+                    console.log(featuresLayer);
+                    map.addLayer(featuresLayer);
+                }
             }));
+
+            map.on('click', function (ev) {
+                console.log(ev.latlng);
+                console.log(ev.layerPoint);
+            });
+
+
+            /* 
+                        searchControl.on('search:locationfound', function (e) {
+            
+                                //console.log('search:locationfound', );
+            
+                                //map.removeLayer(this._markerSearch)
+            
+                                e.layer.setStyle({ fillColor: '#3f0', color: '#0f0' });
+                                if (e.layer._popup)
+                                    e.layer.openPopup();
+            
+                            }).on('search:collapsed', function (e) {
+            
+                                featuresLayer.eachLayer(function (layer) {	//restore feature color
+                                    featuresLayer.resetStyle(layer);
+                                });
+                            });
+
+            map.addControl(searchControl);  //inizialize search control */
 
         </script>
     </div>
