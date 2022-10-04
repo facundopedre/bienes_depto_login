@@ -1,16 +1,33 @@
+<style type="text/css">
+  h1 {
+        color: #04AA6D;
+    }
+
+    button[type=submit] {
+        background-color: #04AA6D;
+        padding: 4px;
+        border: 1px solid black;
+        border-radius: 4px;
+        font-weight: 700;
+        color: wheat;
+    }
+</style>
+
 <h1>Login</h1>
 <% if (messages.error) { %>
   <%= messages.error %>
 <% } %>
 <form action="/login" method="POST">
   <div>
-    <label for="email">Usuario</label>
-    <input type="text" id="email" name="email" required>
+    <label for="name">Usuario</label>
+    <input type="text" id="name" name="name" required>
   </div>
   <div>
     <label for="password">Contraseña</label>
     <input type="password" id="password" name="password" required>
   </div>
-  <button type="submit">Iniciar Sesión</button>
+  <br>
+  <div>
+    <button type="submit">Iniciar Sesión</button>
+  </div>
 </form>
-<!-- <a href="/register">Register</a> -->

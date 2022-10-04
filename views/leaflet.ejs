@@ -90,8 +90,8 @@
 
     <h1>Búsqueda de padrones especiales</h1>
     <div>
-        <p>Buscar por número de padron o clickear en alguno para obtener su información, muestra la información de un
-            padron a la vez.</p>
+        <p>Buscar por número de padrón o clickear en alguno para obtener su información, muestra la información de un
+            padrón a la vez.</p>
     </div>
     <div id="map">
         <script type="text/javascript">
@@ -105,17 +105,7 @@
                 attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
             });
             capa_base.addTo(map);
-
-            // var capa_padrones = L.tileLayer.wms('http://geoserver.montevideo.gub.uy/geoserver/ide/wms', {
-            //     layers: 'v_sb_bienes_depto',
-            //     format: 'image/png',
-            //     transparent: true,
-            //     version: '1.1.0',
-            //     attribution: false
-            // });
-
-            // capa_padrones.addTo(map);
-
+            
             const wfstPointOptions = {
                 crs: L.CRS.EPSG4326,
                 showExisting: true,
@@ -124,12 +114,12 @@
                 typeNS: 'v_sb_bienes_depto',
                 typeName: 'v_sb_bienes_depto',
                 style: function (layer) {
-                    // you can use if statemt etc
                     return {
-                        color: 'black',
+                        color: '#9a1f1f',
                         weight: 1
                     }
                 },
+                filter: new L.Filter.Like('the_geom','*', { wildCard: '*', matchCase: false})
             };
 
             var capa_padrones_wfs = new L.WFS(wfstPointOptions).addTo(map);
@@ -142,7 +132,7 @@
                 collapsed: false,
                 moveToLocation: function (latlng, title, map) {
                     map.setView(latlng, 16);
-                    JSONtoHTML(latlng.layer.feature.properties);
+                    WFStoHTML(latlng.layer.feature.properties);
                 }
             }));
 
@@ -150,14 +140,14 @@
                 var array = Object.entries(capa_padrones_wfs._layers);
                 array.some(function (element) {
                     if (element[1]._bounds.contains(ev.latlng)) {
-                        JSONtoHTML(element[1].feature.properties);
+                        WFStoHTML(element[1].feature.properties);
                         return true;
                     }
                 });
             }
             );
 
-            function JSONtoHTML(obj) {
+            function WFStoHTML(obj) {
                 var result = Object.keys(obj).map((key) => [`<th>${key}</th>`, `<td>${obj[key]}</td>`]);
                 document.getElementById("row-title").innerHTML = "";
                 document.getElementById("row-data").innerHTML = "";
